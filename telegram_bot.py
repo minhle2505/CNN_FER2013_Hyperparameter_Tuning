@@ -12,6 +12,22 @@ print("staus code:", resp.content)
 import telebot
 import requests
 from io import BytesIO
+from pymongo.mongo_client import MongoClient
+import datetime
+
+uri = "mongodb+srv://minh25:250502@emoi.qa1nrlv.mongodb.net/?retryWrites=true&w=majority&appName=Emoi"
+
+# Create a new client and connect to the server
+client = MongoClient(uri)
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+db = client.EmotionClassification
+collection = db.Emotion
 #%%
 # Save the token in a variable
 api_key = token
@@ -73,9 +89,15 @@ def handle_photo(message):
         resized_face /= 255
 
         # Dự đoán bằng mô hình
-        prediction = model.predict(resized_face)
+        prediction = untuned.predict(resized_face)
         predicted_label = label_names[np.argmax(prediction)]
         bot.reply_to(message,predicted_label)
+        current_time = datetime.datetime.now()
+        data = {
+            "label":predicted_label,
+            "time":current_time,
+        }# Thêm một tài liệu mới vào bộ sưu tập
+        insert_result = collection.insert_one(data)
     else :
         bot.reply_to(message,"Can't detect any people in image.")
 @bot.message_handler(func=lambda message: True)
