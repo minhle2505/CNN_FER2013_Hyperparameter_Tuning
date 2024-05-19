@@ -89,7 +89,7 @@ def handle_photo(message):
         resized_face /= 255
 
         # Dự đoán bằng mô hình
-        prediction = untuned.predict(resized_face)
+        prediction = model.predict(resized_face)
         predicted_label = label_names[np.argmax(prediction)]
         bot.reply_to(message,predicted_label)
         current_time = datetime.datetime.now()
